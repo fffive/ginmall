@@ -28,7 +28,7 @@ var (
 	SmtpHost   string
 	SmtpEmail  string
 	SmtpPass   string
-
+	
 	photoHost   string
 	ProductPath string
 	AvatarPath  string
@@ -50,7 +50,7 @@ func Init() {
 	LoadRedis(file)
 	LoadEmail(file)
 	LoadPhotoPath(file)
-	LoadEs(file)
+	// LoadEs(file)
 
 	// mysql 读
 	pathRead := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
@@ -95,7 +95,7 @@ func LoadRedis(file *ini.File) {
 
 func LoadEmail(file *ini.File) {
 	ValidEmail = file.Section("email").Key("ValidEmail").String()
-	SmtpHost = file.Section("email").Key("").String()
+	SmtpHost = file.Section("email").Key("SmtpHost").String()
 	SmtpEmail = file.Section("email").Key("SmtpEmail").String()
 	SmtpPass = file.Section("email").Key("SmtpPass").String()
 }
@@ -106,8 +106,8 @@ func LoadPhotoPath(file *ini.File) {
 	AvatarPath = file.Section("photopath").Key("AvatarPath").String()
 }
 
-func LoadEs(file *ini.File) {
-	EsHost = file.Section("es").Key("EsHost").String()
-	EsPort = file.Section("es").Key("EsPort").String()
-	EsIndex = file.Section("es").Key("EsIndex").String()
-}
+// func LoadEs(file *ini.File) {
+// 	EsHost = file.Section("es").Key("EsHost").String()
+// 	EsPort = file.Section("es").Key("EsPort").String()
+// 	EsIndex = file.Section("es").Key("EsIndex").String()
+// }
