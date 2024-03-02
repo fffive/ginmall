@@ -11,6 +11,7 @@ import (
 var (
 	AppMode  string
 	HttpPort string
+	JwtKey   string
 
 	Db         string
 	DbHost     string
@@ -28,7 +29,7 @@ var (
 	SmtpHost   string
 	SmtpEmail  string
 	SmtpPass   string
-	
+
 	photoHost   string
 	ProductPath string
 	AvatarPath  string
@@ -75,6 +76,7 @@ func Init() {
 func LoadServe(file *ini.File) {
 	AppMode = file.Section("server").Key("AppMode").String()
 	HttpPort = file.Section("server").Key("HtppPort").String()
+	JwtKey = file.Section("server").Key("JwtKey").String()
 }
 
 func LoadMysql(file *ini.File) {
