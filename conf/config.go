@@ -11,7 +11,8 @@ import (
 var (
 	AppMode  string
 	HttpPort string
-	JwtKey   string
+	// Host     string
+	JwtKey string
 
 	Db         string
 	DbHost     string
@@ -30,7 +31,7 @@ var (
 	SmtpEmail  string
 	SmtpPass   string
 
-	photoHost   string
+	Host        string
 	ProductPath string
 	AvatarPath  string
 
@@ -75,6 +76,7 @@ func Init() {
 
 func LoadServe(file *ini.File) {
 	AppMode = file.Section("server").Key("AppMode").String()
+	// Host = file.Section("server").Key("Host").String()
 	HttpPort = file.Section("server").Key("HtppPort").MustString(":3000")
 	JwtKey = file.Section("server").Key("JwtKey").String()
 }
@@ -103,7 +105,7 @@ func LoadEmail(file *ini.File) {
 }
 
 func LoadPhotoPath(file *ini.File) {
-	photoHost = file.Section("photopath").Key("photoHost").String()
+	Host = file.Section("photopath").Key("Host").String()
 	ProductPath = file.Section("photopath").Key("ProductPath").String()
 	AvatarPath = file.Section("photopath").Key("AvatarPath").String()
 }

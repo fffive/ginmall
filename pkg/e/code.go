@@ -5,8 +5,11 @@ const (
 	Error         = 500
 	InvalidParams = 400
 
-	ErrorUserExist  = 30001
-	ErrFailEncrypte = 30002
+	ErrorUserExist         = 30001
+	ErrorFailEncrypte      = 30002
+	ErrorExistUserNotFound = 30003
+	ErrorNotCompare        = 30004
+	ErrorAuthToken         = 30005
 
-	ErrDatabase = 40001
+	ErrorDatabase = 40001
 )

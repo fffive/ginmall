@@ -38,9 +38,9 @@ func (service UserService) Register(ctx context.Context) serializer.Response {
 	// 用户验证是否存在
 	_, exist, err := userDao.ExistOrNotByUserName(service.UserName)
 	if err != nil {
-		code = e.ErrDatabase
+		code = e.ErrorDatabase
 		return serializer.Response{
-			Status: code,	
+			Status: code,
 			Msg:    e.GetMsg(code),
 		}
 	}
@@ -52,17 +52,18 @@ func (service UserService) Register(ctx context.Context) serializer.Response {
 		}
 	}
 
+	// 不存在就可以创建用户
 	user = model.User{
 		UserName: service.UserName,
 		NickName: service.NickName,
-		Avatar:   "default_avatar",
+		Avatar:   "avatar.jpg",
 		Status:   model.Active,
 		Money:    utils.Encrypt.AesEncoding("10000"),
 	}
 
 	// 用户密码加密
 	if err = user.SetPassWord(service.PassWord); err != nil {
-		code = e.ErrFailEncrypte
+		code = e.ErrorFailEncrypte
 		return serializer.Response{
 			Status: code,
 			Msg:    e.GetMsg(code),
@@ -76,6 +77,52 @@ func (service UserService) Register(ctx context.Context) serializer.Response {
 	return serializer.Response{
 		// Status: http.StatusBadRequest,
 		Status: code,
-		Msg: e.GetMsg(code),
+		Msg:    e.GetMsg(code),
 	}
+}
+
+func (service UserService) Login(ctx context.Context) serializer.Response {
+	var user *model.User
+
+	code := e.Success
+	userDao := dao.NewUserDao(ctx)
+	user, exist, err := userDao.ExistOrNotByUserName(service.UserName)
+	if !exist || err != nil {
+		code = e.ErrorExistUserNotFound
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Data:   "用户不存在，请先注册",
+		}
+	}
+
+	// 检查密码是否正确
+	if !user.CheckPassword(service.PassWord) {
+		code = e.ErrorNotCompare
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Data:   "密码错误，请重试",
+		}
+	}
+
+	// token 签发售
+	token, err := utils.GenerateToken(user.ID, user.UserName, 0)
+	if err != nil {
+		code = e.ErrorAuthToken
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+
+	return serializer.Response{
+		Status: code,
+		Msg:    e.GetMsg(code),
+		Data: serializer.TokenData{
+			User:  serializer.BuildUser(user),
+			Token: token,
+		},
+	}
+
 }

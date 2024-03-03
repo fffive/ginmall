@@ -1,6 +1,7 @@
 package model
 
 import (
+	"fmt"
 
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -31,3 +32,10 @@ func (user *User) SetPassWord(password string) error {
 	user.PassWord = string(bytes)
 	return nil
 } 
+
+// 检查密码是否正确
+func (user *User) CheckPassword(password string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(user.PassWord), []byte(password))
+	fmt.Println(password )
+	return err == nil
+}

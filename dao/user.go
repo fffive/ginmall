@@ -2,7 +2,6 @@ package dao
 
 import (
 	"context"
-	"fmt"
 	"ginmall/model"
 
 	"gorm.io/gorm"
@@ -26,9 +25,12 @@ func (dao *UserDao) ExistOrNotByUserName(username string) (user *model.User, exi
 	var count int64
 
 	err = dao.DB.Model(&model.User{}).Where("user_name=?", username).Find(&user).Count(&count).Error
-	fmt.Println(err)
-	if count == 0 || err != nil {
-		return nil, false, fmt.Errorf("record not found for username: %s", username)
+	if count == 0 {
+		return nil, false, err
+	}
+	err = dao.DB.Model(&model.User{}).Where("user_name=?", username).First(&user).Error
+	if err != nil {
+		return user, false, err
 	}
 	return user, true, nil
 }
@@ -37,3 +39,4 @@ func (dao *UserDao) ExistOrNotByUserName(username string) (user *model.User, exi
 func (dao *UserDao) CreateUser(user *model.User) error {
 	return dao.DB.Model(&model.User{}).Create(&user).Error
 }
+
