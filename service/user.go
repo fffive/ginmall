@@ -2,12 +2,16 @@ package service
 
 import (
 	"context"
+	"ginmall/conf"
 	"ginmall/dao"
 	"ginmall/model"
 	"ginmall/pkg/e"
 	"ginmall/pkg/utils"
 	"ginmall/serializer"
 	"mime/multipart"
+	"strings"
+
+	"gopkg.in/mail.v2"
 )
 
 type UserService struct {
@@ -15,6 +19,13 @@ type UserService struct {
 	UserName string `json:"user_name" form:"user_name"`
 	PassWord string `json:"pass_word" form:"pass_word"`
 	Key      string `json:"key" form:"key"`
+}
+
+type SendService struct {
+	Email         string `json:"email" form:"email"`
+	PassWord      string `json:"pass_word" form:"pass_word"`
+	OperationType uint   `json:"operation_type" form:"operation_type"`
+	// 1.绑定邮箱 2. 解除绑定 3.修改密码
 }
 
 func (service UserService) Register(ctx context.Context) serializer.Response {
@@ -131,12 +142,12 @@ func (service UserService) Login(ctx context.Context) serializer.Response {
 // 用户信息更新
 func (service UserService) Update(ctx context.Context, uid uint) serializer.Response {
 	var user *model.User
-	var err error 
+	var err error
 	code := e.Success
 	userDao := dao.NewUserDao(ctx)
 
 	// 寻找用户
-	user, _ = userDao.GetUserById(uid);
+	user, _ = userDao.GetUserById(uid)
 
 	// 更改NickName
 	if service.NickName != "" {
@@ -148,14 +159,14 @@ func (service UserService) Update(ctx context.Context, uid uint) serializer.Resp
 		code = e.Error
 		return serializer.Response{
 			Status: code,
-			Msg: e.GetMsg(code),
+			Msg:    e.GetMsg(code),
 		}
 	}
 
 	return serializer.Response{
 		Status: code,
-		Msg: e.GetMsg(code),
-		Data: "用户昵称修改已修改为"+service.NickName,
+		Msg:    e.GetMsg(code),
+		Data:   "用户昵称修改已修改为" + service.NickName,
 	}
 }
 
@@ -171,8 +182,8 @@ func (service UserService) Post(ctx context.Context, uid uint, file multipart.Fi
 		code = e.Error
 		return serializer.Response{
 			Status: code,
-			Msg: e.GetMsg(code),
-			Error: err.Error(),
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
 		}
 	}
 
@@ -182,8 +193,8 @@ func (service UserService) Post(ctx context.Context, uid uint, file multipart.Fi
 		code = e.ErrorUploadFail
 		return serializer.Response{
 			Status: code,
-			Msg: e.GetMsg(code),
-			Data: "上传文件失败",
+			Msg:    e.GetMsg(code),
+			Data:   "上传文件失败",
 		}
 	}
 	user.Avatar = path
@@ -192,12 +203,65 @@ func (service UserService) Post(ctx context.Context, uid uint, file multipart.Fi
 		code = e.Error
 		return serializer.Response{
 			Status: code,
-			Msg: e.GetMsg(code),
+			Msg:    e.GetMsg(code),
 		}
 	}
 	return serializer.Response{
 		Status: code,
-		Msg: e.GetMsg(code),
-		Data: serializer.BuildUser(user),
+		Msg:    e.GetMsg(code),
+		Data:   serializer.BuildUser(user),
 	}
+}
+
+// 发送邮件 确认信息
+func (service SendService) Send(ctx context.Context, uid uint) serializer.Response {
+	code := e.Success
+	var address string
+	var notice *model.Notice
+	_, err := utils.GenerateEmailToken(uid, service.PassWord, service.Email, service.OperationType)
+
+	if err != nil {
+		code = e.ErrorAuthToken
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+	noticeDao := dao.NewNoticeDao(ctx)
+	notice, err = noticeDao.GetNoticeById(service.OperationType)
+	if err != nil {
+		code = e.Error
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Data:   err.Error(),
+		}
+	}
+	address = "我写了三行字<br>爱要藏在哪里才合适<br>你又能一看便知<br>"
+	// address = conf.ValidEmail + token // 发送方
+	mailstr := notice.Info
+	mailText := strings.Replace(mailstr, "Email", address, -1)
+	m := mail.NewMessage()
+	m.SetHeader("From", conf.SmtpEmail)
+	m.SetHeader("To", service.Email)
+	m.SetHeader("Subject", "Chat")
+	m.SetBody("text/html", mailText)
+	d := mail.NewDialer(conf.SmtpHost, 465, conf.SmtpEmail, conf.SmtpPass)
+	d.StartTLSPolicy = mail.MandatoryStartTLS
+	if err := d.DialAndSend(m); err != nil {
+		code = e.ErrSendEmail
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+
+	return serializer.Response{
+		Status: code,
+		Msg:    e.GetMsg(code),
+		Data:   address,
+	}
+
 }

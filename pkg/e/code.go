@@ -12,6 +12,7 @@ const (
 	ErrorAuthToken             = 30005
 	ErrorAuthCheckTokenTimeOut = 30006
 	ErrorUploadFail            = 30007
+	ErrSendEmail               = 30008
 
 	ErrorDatabase = 40001
 )

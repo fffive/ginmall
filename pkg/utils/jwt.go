@@ -16,6 +16,14 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
+type EmailClaims struct {
+	UserID        uint   `json:"user_id"`
+	Email  string `json:"email"`
+	PassWord string `json:"pass_word"`
+	OperationType uint    `json:"operation_type"`
+	jwt.StandardClaims
+}
+
 // 签发token
 func GenerateToken(id uint, username string, authority int) (string, error) {
 	now := time.Now()
@@ -52,4 +60,39 @@ func ParseToken(token string) (*Claims, error) {
 	return nil, err
 }
 
-// jwt中间件
+// EmailClaims 生成token
+func GenerateEmailToken(userid uint, password string, email string, operationtype uint) (string, error) {
+	now := time.Now()
+	expireTime := now.Add(24 * time.Hour)
+
+	claims := EmailClaims{
+		UserID: userid,
+		PassWord: password,
+		Email: email,
+		OperationType: operationtype,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: expireTime.Unix(),
+			Issuer:    "email",
+		},
+	}
+
+	// token 加密 签发
+	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	token, err := tokenClaims.SignedString(JwtKey)
+	return token, err
+}
+
+// EmailClaims 解码验证Token
+func ParseEmailToken(token string) (*EmailClaims, error) {
+	tokenClaims, err := jwt.ParseWithClaims(token, &EmailClaims{}, func(t *jwt.Token) (interface{}, error) {
+		return JwtKey, nil
+	})
+
+	if tokenClaims != nil {
+		if Emailclaims, ok := tokenClaims.Claims.(*EmailClaims); ok && tokenClaims.Valid {
+			return Emailclaims, nil
+		}
+	}
+
+	return nil, err
+}
