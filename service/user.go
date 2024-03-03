@@ -7,6 +7,7 @@ import (
 	"ginmall/pkg/e"
 	"ginmall/pkg/utils"
 	"ginmall/serializer"
+	"mime/multipart"
 )
 
 type UserService struct {
@@ -125,4 +126,78 @@ func (service UserService) Login(ctx context.Context) serializer.Response {
 		},
 	}
 
+}
+
+// 用户信息更新
+func (service UserService) Update(ctx context.Context, uid uint) serializer.Response {
+	var user *model.User
+	var err error 
+	code := e.Success
+	userDao := dao.NewUserDao(ctx)
+
+	// 寻找用户
+	user, _ = userDao.GetUserById(uid);
+
+	// 更改NickName
+	if service.NickName != "" {
+		user.NickName = service.NickName
+	}
+
+	err = userDao.UpdateUserById(uid, user)
+	if err != nil {
+		code = e.Error
+		return serializer.Response{
+			Status: code,
+			Msg: e.GetMsg(code),
+		}
+	}
+
+	return serializer.Response{
+		Status: code,
+		Msg: e.GetMsg(code),
+		Data: "用户昵称修改已修改为"+service.NickName,
+	}
+}
+
+// 修改头像
+func (service UserService) Post(ctx context.Context, uid uint, file multipart.File, filesize int64) serializer.Response {
+	var user *model.User
+	var err error
+	code := e.Success
+	userDao := dao.NewUserDao(ctx)
+	user, err = userDao.GetUserById(uid)
+
+	if err != nil {
+		code = e.Error
+		return serializer.Response{
+			Status: code,
+			Msg: e.GetMsg(code),
+			Error: err.Error(),
+		}
+	}
+
+	// 保存图片到本地
+	path, err := UploadAvatarToLoacalStatic(file, uid, user.UserName)
+	if err != nil {
+		code = e.ErrorUploadFail
+		return serializer.Response{
+			Status: code,
+			Msg: e.GetMsg(code),
+			Data: "上传文件失败",
+		}
+	}
+	user.Avatar = path
+	err = userDao.UpdateUserById(uid, user)
+	if err != nil {
+		code = e.Error
+		return serializer.Response{
+			Status: code,
+			Msg: e.GetMsg(code),
+		}
+	}
+	return serializer.Response{
+		Status: code,
+		Msg: e.GetMsg(code),
+		Data: serializer.BuildUser(user),
+	}
 }

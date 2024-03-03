@@ -22,6 +22,14 @@ func NewRouter() *gin.Engine{
 		// 用户操作 
 		v1.POST("user/register", api.UserRegister)
 		v1.POST("user/login", api.UserLogin)
+
+		authed := v1.Group("/")
+		authed.Use(middleware.JWT())
+		{
+			// 修改用户信息
+			authed.PUT("user", api.UserUpdate)
+			authed.POST("avatar", api.UploadAvatar)
+		}
 	}
 	
 	return r

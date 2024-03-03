@@ -5,11 +5,13 @@ const (
 	Error         = 500
 	InvalidParams = 400
 
-	ErrorUserExist         = 30001
-	ErrorFailEncrypte      = 30002
-	ErrorExistUserNotFound = 30003
-	ErrorNotCompare        = 30004
-	ErrorAuthToken         = 30005
+	ErrorUserExist             = 30001
+	ErrorFailEncrypte          = 30002
+	ErrorExistUserNotFound     = 30003
+	ErrorNotCompare            = 30004
+	ErrorAuthToken             = 30005
+	ErrorAuthCheckTokenTimeOut = 30006
+	ErrorUploadFail            = 30007
 
 	ErrorDatabase = 40001
 )
