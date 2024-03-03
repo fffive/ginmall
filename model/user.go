@@ -1,6 +1,10 @@
 package model
 
-import "gorm.io/gorm"
+import (
+
+	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
+)
 
 type User struct {
 	gorm.Model
@@ -12,3 +16,18 @@ type User struct {
 	Avatar   string
 	Money    string
 }
+
+const (
+	PassWordCost = 12 // 密码难度 
+	Active string = "active" // 用户状态
+)
+
+// 设置密码  
+func (user *User) SetPassWord(password string) error {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), PassWordCost) // bcrypt.GenerateFromPassword
+	if err != nil {
+		return err
+	}
+	user.PassWord = string(bytes)
+	return nil
+} 

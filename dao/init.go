@@ -63,7 +63,5 @@ func Database(connRead, connWrite string) {
 // 确保上下文连接
 func NewDBclient(ctx context.Context) *gorm.DB {
 	db := _db
-	db.WithContext(ctx)
-	// todo
-	return nil
+	return db.WithContext(ctx)
 }

@@ -75,7 +75,7 @@ func Init() {
 
 func LoadServe(file *ini.File) {
 	AppMode = file.Section("server").Key("AppMode").String()
-	HttpPort = file.Section("server").Key("HtppPort").String()
+	HttpPort = file.Section("server").Key("HtppPort").MustString(":3000")
 	JwtKey = file.Section("server").Key("JwtKey").String()
 }
 

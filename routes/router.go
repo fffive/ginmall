@@ -2,6 +2,7 @@ package routes
 
 import (
 	"ginmall/middleware"
+	api "ginmall/api/v1"
 	"net/http"
 	
 	"github.com/gin-gonic/gin"
@@ -20,7 +21,6 @@ func NewRouter() *gin.Engine{
 		})
 		// 用户操作 
 		v1.POST("user/register", api.UserRegister)
-		
 	}
 	
 	return r
