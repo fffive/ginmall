@@ -79,3 +79,28 @@ func SendEmail(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, err)
 	}
 }
+
+// 验证邮箱
+func ValidEmail(c *gin.Context) {
+	var validEmailService service.ValidEmailService
+
+	if err := c.ShouldBind(&validEmailService); err == nil {
+		res := validEmailService.Valid(c.Request.Context(), c.GetHeader("Authorization"))
+		c.JSON(http.StatusOK, res)
+	}else {
+		c.JSON(http.StatusBadRequest, err)
+	}
+}
+
+// 展示金额 来源:中国银行的设置
+func ShowMoney(c *gin.Context) {
+	var showMoneyService service.ShowMoneyService
+
+	claims, _ := utils.ParseToken(c.GetHeader("Authorization"))
+	if err := c.ShouldBind(&showMoneyService); err == nil {
+		res := showMoneyService.ShowMoney(c.Request.Context(), claims.ID)
+		c.JSON(http.StatusOK, res)
+	}else {
+		c.JSON(http.StatusBadRequest, err)
+	}
+}

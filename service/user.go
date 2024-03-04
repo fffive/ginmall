@@ -10,6 +10,7 @@ import (
 	"ginmall/serializer"
 	"mime/multipart"
 	"strings"
+	"time"
 
 	"gopkg.in/mail.v2"
 )
@@ -26,6 +27,15 @@ type SendService struct {
 	PassWord      string `json:"pass_word" form:"pass_word"`
 	OperationType uint   `json:"operation_type" form:"operation_type"`
 	// 1.绑定邮箱 2. 解除绑定 3.修改密码
+}
+
+type ValidEmailService struct {
+	Info string `json:"info" form:"info"`
+	// todo
+}
+
+type ShowMoneyService struct {
+	Key string `json:"key" form:"key"`
 }
 
 func (service UserService) Register(ctx context.Context) serializer.Response {
@@ -218,7 +228,7 @@ func (service SendService) Send(ctx context.Context, uid uint) serializer.Respon
 	code := e.Success
 	var address string
 	var notice *model.Notice
-	_, err := utils.GenerateEmailToken(uid, service.PassWord, service.Email, service.OperationType)
+	token, err := utils.GenerateEmailToken(uid, service.PassWord, service.Email, service.OperationType)
 
 	if err != nil {
 		code = e.ErrorAuthToken
@@ -238,8 +248,8 @@ func (service SendService) Send(ctx context.Context, uid uint) serializer.Respon
 			Data:   err.Error(),
 		}
 	}
-	address = "我写了三行字<br>爱要藏在哪里才合适<br>你又能一看便知<br>"
-	// address = conf.ValidEmail + token // 发送方
+	// address = "我写了三行字<br>爱要藏在哪里才合适<br>你又能一看便知<br>"
+	address = conf.ValidEmail + token // 发送方
 	mailstr := notice.Info
 	mailText := strings.Replace(mailstr, "Email", address, -1)
 	m := mail.NewMessage()
@@ -263,5 +273,102 @@ func (service SendService) Send(ctx context.Context, uid uint) serializer.Respon
 		Msg:    e.GetMsg(code),
 		Data:   address,
 	}
+}
 
+// 验证邮箱
+func (service ValidEmailService) Valid(c context.Context, token string) serializer.Response {
+	var userId, operationtype uint
+	var password, email string
+
+	code := e.Success
+	// 判断解析Token
+	if token == "" {
+		code = e.InvalidParams
+	} else {
+		claims, err := utils.ParseEmailToken(token)
+		if err != nil {
+			code = e.ErrorAuthToken
+		} else if time.Now().Unix() > claims.ExpiresAt {
+			code = e.ErrorAuthCheckTokenTimeOut
+		} else {
+			userId = claims.UserID
+			password = claims.PassWord
+			operationtype = claims.OperationType
+			email = claims.Email
+		}
+	}
+
+	if code != e.Success {
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+
+	userDao := dao.NewUserDao(c)
+	// 寻找到User
+	user, err := userDao.GetUserById(userId)
+	if err != nil {
+		code = e.Error
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+
+	if operationtype == 1 {
+		// 绑定邮箱
+		// todo 还需要考虑是否已经绑定邮箱 采用解除绑定以后才能重新绑定邮箱
+		user.Email = email
+	} else if operationtype == 2 {
+		// 解除绑定邮箱
+		// todo 采用更好的修改方法
+		user.Email = "unfix"
+	} else if operationtype == 3 {
+		err = user.SetPassWord(password)
+		if err != nil {
+			code = e.Error
+			return serializer.Response{
+				Status: code,
+				Msg:    e.GetMsg(code),
+				Error:  err.Error(),
+			}
+		}
+	}
+
+	err = userDao.UpdateUserById(userId, user)
+	if err != nil {
+		code = e.ErrorDatabase
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+	return serializer.Response{
+		Status: code,
+		Msg:    e.GetMsg(code),
+		Data:   serializer.BuildUser(user),
+	}
+}
+
+func (service ShowMoneyService) ShowMoney(ctx context.Context, uid uint) serializer.Response {
+	code := e.Success
+	userDao := dao.NewUserDao(ctx)
+
+	user, err := userDao.GetUserById(uid)
+	if err != nil {
+		return serializer.Response{
+			Status: code,
+			Msg: e.GetMsg(code),
+			Error: err.Error(),
+		}
+	}
+
+	return serializer.Response{
+		Status: code,
+		Msg: e.GetMsg(code),
+		Data: serializer.BuildMoney(user, service.Key),
+	}
 }

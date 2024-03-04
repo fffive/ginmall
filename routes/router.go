@@ -1,14 +1,14 @@
 package routes
 
 import (
-	"ginmall/middleware"
 	api "ginmall/api/v1"
+	"ginmall/middleware"
 	"net/http"
-	
+
 	"github.com/gin-gonic/gin"
 )
 
-func NewRouter() *gin.Engine{
+func NewRouter() *gin.Engine {
 	r := gin.Default()
 
 	r.Use(middleware.Cors())
@@ -19,7 +19,7 @@ func NewRouter() *gin.Engine{
 		v1.GET("ping", func(ctx *gin.Context) {
 			ctx.JSON(http.StatusOK, "success")
 		})
-		// 用户操作 
+		// 用户操作
 		v1.POST("user/register", api.UserRegister)
 		v1.POST("user/login", api.UserLogin)
 
@@ -30,8 +30,12 @@ func NewRouter() *gin.Engine{
 			authed.PUT("user", api.UserUpdate)
 			authed.POST("avatar", api.UploadAvatar)
 			authed.POST("user/sending-email", api.SendEmail)
+			authed.POST("user/valid-email", api.ValidEmail)
+
+			// 查看Money
+			authed.POST("money", api.ShowMoney)
 		}
 	}
-	
+
 	return r
 }

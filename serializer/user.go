@@ -24,7 +24,7 @@ func BuildUser(user *model.User) *UserVo {
 		NickName: user.NickName,
 		Avatar: conf.Host + conf.HttpPort + conf.AvatarPath + user.Avatar,
 		Status: user.Status,
-		Email: user.Status,
+		Email: user.Email,
 		CreateAt: user.CreatedAt.Unix(),
 	}
 }
