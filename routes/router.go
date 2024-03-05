@@ -22,6 +22,8 @@ func NewRouter() *gin.Engine {
 		// 用户操作
 		v1.POST("user/register", api.UserRegister)
 		v1.POST("user/login", api.UserLogin)
+		// 轮播图的展示
+		v1.GET("carousels", api.ListCarousels)
 
 		authed := v1.Group("/")
 		authed.Use(middleware.JWT())
@@ -34,6 +36,7 @@ func NewRouter() *gin.Engine {
 
 			// 查看Money
 			authed.POST("money", api.ShowMoney)
+			
 		}
 	}
 
