@@ -28,6 +28,25 @@ func UploadAvatarToLoacalStatic(file multipart.File, userId uint, userName strin
 	return "user" + bId + "/" + userName + ".jpg", nil
 }
 
+func UploadProductToLoacalStatic(file multipart.File, userId uint, productName string) (filePath string, err error) {
+	bId := strconv.Itoa(int(userId))
+	basePath := "." + conf.ProductPath + "boss" + bId + "/"
+	if !DirExistOrNot(basePath) {
+		CreateDir(basePath)
+	}
+
+	productPath := basePath + productName + ".jpg" // todo 提取后缀
+	content, err := io.ReadAll(file)
+	if err != nil {
+		return "", err
+	}
+	err = os.WriteFile(productPath, content, 0666)
+	if err != nil {
+		return
+	}
+	return "boss" + bId + "/" + productName + ".jpg", nil
+}
+
 // 判断路径存在与否
 func DirExistOrNot(fileAddr string) bool {
 	if s, err := os.Stat(fileAddr); err != nil {

@@ -36,7 +36,9 @@ func NewRouter() *gin.Engine {
 
 			// 查看Money
 			authed.POST("money", api.ShowMoney)
-			
+
+			// 用户创建商品
+			authed.POST("product", api.CreateProduct)
 		}
 	}
 

@@ -2,7 +2,7 @@ package v1
 
 import (
 	"net/http"
-
+	logging "github.com/sirupsen/logrus"
 	"ginmall/pkg/utils"
 	"ginmall/service"
 
@@ -20,7 +20,8 @@ func UserRegister(c *gin.Context) {
 		res := userRegister.Register(c.Request.Context())
 		c.JSON(http.StatusOK, res)
 	}else {
-		c.JSON(http.StatusBadRequest, err)
+		c.JSON(http.StatusBadRequest, ErrorRespond(err))
+		logging.Info(err)
 	}
 }
 
@@ -33,7 +34,8 @@ func UserLogin(c *gin.Context) {
 		res := userLogin.Login(c.Request.Context())
 		c.JSON(http.StatusOK, res)
 	}else {
-		c.JSON(http.StatusBadRequest, err)
+		c.JSON(http.StatusBadRequest, ErrorRespond(err))
+		logging.Info(err)
 	}
 }
 
@@ -47,7 +49,8 @@ func UserUpdate(c *gin.Context) {
 		res := userUpdate.Update(c.Request.Context(), claims.ID)
 		c.JSON(http.StatusOK, res)
 	}else {
-		c.JSON(http.StatusBadRequest, err)
+		c.JSON(http.StatusBadRequest, ErrorRespond(err))
+		logging.Info(err)
 	}
 }
 
@@ -63,7 +66,8 @@ func UploadAvatar(c *gin.Context) {
 		res := uploadAvatar.Post(c.Request.Context(), claims.ID, file, fileSize)
 		c.JSON(http.StatusOK, res)
 	} else {
-		c.JSON(http.StatusBadRequest, err)
+		c.JSON(http.StatusBadRequest, ErrorRespond(err))
+		logging.Info(err)
 	}
 }
 
@@ -76,7 +80,8 @@ func SendEmail(c *gin.Context) {
 		res := sendService.Send(c.Request.Context(), claims.ID)
 		c.JSON(http.StatusOK, res)
 	}else {
-		c.JSON(http.StatusBadRequest, err)
+		c.JSON(http.StatusBadRequest, ErrorRespond(err))
+		logging.Info(err)
 	}
 }
 
@@ -101,6 +106,8 @@ func ShowMoney(c *gin.Context) {
 		res := showMoneyService.ShowMoney(c.Request.Context(), claims.ID)
 		c.JSON(http.StatusOK, res)
 	}else {
-		c.JSON(http.StatusBadRequest, err)
+		c.JSON(http.StatusBadRequest, ErrorRespond(err))
+		logging.Info(err)
 	}
 }
+
