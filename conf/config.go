@@ -21,10 +21,10 @@ var (
 	DbPassWord string
 	DbName     string
 
-	RedisDb     string
-	RedisAddr   string
-	RedisPw     string
-	RedisDbName string
+	// RedisDb     string
+	// RedisAddr   string
+	// RedisPw     string
+	// RedisDbName string
 
 	ValidEmail string
 	SmtpHost   string
@@ -49,7 +49,7 @@ func Init() {
 	}
 	LoadServe(file)
 	LoadMysql(file)
-	LoadRedis(file)
+	// LoadRedis(file)
 	LoadEmail(file)
 	LoadPhotoPath(file)
 	// LoadEs(file)
@@ -90,12 +90,12 @@ func LoadMysql(file *ini.File) {
 	DbName = file.Section("mysql").Key("DbName").String()
 }
 
-func LoadRedis(file *ini.File) {
-	RedisDb = file.Section("redis").Key("RedisDb").String()
-	RedisAddr = file.Section("redis").Key("RedisAddr").String()
-	RedisPw = file.Section("redis").Key("RedisPw").String()
-	RedisDbName = file.Section("redis").Key("RedisDbName").String()
-}
+// func LoadRedis(file *ini.File) {
+// 	RedisDb = file.Section("redis").Key("RedisDb").String()
+// 	RedisAddr = file.Section("redis").Key("RedisAddr").String()
+// 	RedisPw = file.Section("redis").Key("RedisPw").String()
+// 	RedisDbName = file.Section("redis").Key("RedisDbName").String()
+// }
 
 func LoadEmail(file *ini.File) {
 	ValidEmail = file.Section("email").Key("ValidEmail").String()

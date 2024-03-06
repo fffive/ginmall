@@ -2,6 +2,7 @@ package dao
 
 import (
 	"context"
+	"ginmall/model"
 
 	"gorm.io/gorm"
 )
@@ -18,3 +19,6 @@ func NewProductDaoByDb(db *gorm.DB) *ProductDao {
 	return &ProductDao{db}
 }
 
+func (dao ProductDao) Create(product *model.Product) error {
+	return dao.DB.Model(&model.Product{}).Create(&product).Error
+}

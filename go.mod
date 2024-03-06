@@ -11,6 +11,13 @@ require (
 )
 
 require (
+	github.com/go-redis/redis v6.15.9+incompatible
+	github.com/google/go-cmp v0.6.0 // indirect
+	github.com/onsi/ginkgo v1.16.5 // indirect
+	github.com/onsi/gomega v1.31.1 // indirect
+)
+
+require (
 	github.com/sirupsen/logrus v1.9.3
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 )
