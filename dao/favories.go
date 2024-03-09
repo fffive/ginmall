@@ -34,10 +34,12 @@ func (dao FavoriteDao) FavoriteExistOrNot(pid, uid uint) (exist bool, err error)
 	return true, err
 }
 
+// 删除
 func (dao FavoriteDao) Delete(fid uint) error {
 	return dao.DB.Where("id = ?", fid).Delete(&model.Favorite{}).Error
 }
 
+// 展示
 func (dao FavoriteDao) Show(uid uint, page model.Base) (favorites []*model.Favorite, err error) {
 	err = dao.DB.Model(&model.Favorite{}).Preload("User").
 		Where("user_id = ?", uid).

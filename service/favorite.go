@@ -6,6 +6,7 @@ import (
 	"ginmall/model"
 	"ginmall/pkg/e"
 	"ginmall/serializer"
+	"strconv"
 
 	"github.com/sirupsen/logrus"
 )
@@ -17,7 +18,7 @@ type FavoriteService struct {
 	model.Base
 }
 
-func (service FavoriteService) Create(ctx context.Context, uid uint) serializer.Response {
+func (service *FavoriteService) Create(ctx context.Context, uid uint) serializer.Response {
 	code := e.Success
 	favoriteDao := dao.NewFavoriteDao(ctx)
 
@@ -90,7 +91,7 @@ func (service FavoriteService) Create(ctx context.Context, uid uint) serializer.
 	}
 }
 
-func (service FavoriteService) Show(ctx context.Context, uid uint) serializer.Response {
+func (service *FavoriteService) Show(ctx context.Context, uid uint) serializer.Response {
 	favoriteDao := dao.NewFavoriteDao(ctx)
 	var code int
 
@@ -105,10 +106,34 @@ func (service FavoriteService) Show(ctx context.Context, uid uint) serializer.Re
 		code = e.ErrorDatabase
 		return serializer.Response{
 			Status: code,
-			Msg: e.GetMsg(code),
-			Error: err.Error(),
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
 		}
 	}
 
 	return serializer.BuildListResponse(serializer.BuildFavorites(ctx, favorites), uint(len(favorites)))
+}
+
+func (service *FavoriteService) Delete(ctx context.Context, uid uint, id string) serializer.Response {
+	code := e.Success
+	favoriteDao := dao.NewFavoriteDao(ctx)
+	fid, _ := strconv.Atoi(id)
+	service.FavoriteId = uint(fid)
+
+	err := favoriteDao.Delete(service.FavoriteId)
+	if err != nil {
+		logrus.Info(err)
+		code := e.ErrorDatabase
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+
+	return serializer.Response{
+		Status: code,
+		Msg:    e.GetMsg(code),
+		Data:   service.FavoriteId,
+	}
 }

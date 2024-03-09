@@ -51,6 +51,7 @@ func NewRouter() *gin.Engine {
 			//收藏夹
 			authed.POST("favorites", api.CraeteFavorite)
 			authed.GET("favorites", api.ShowFavorities)
+			authed.DELETE("favorites/:id", api.DeleteFavorite)
 		}
 	}
 
