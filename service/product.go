@@ -9,6 +9,8 @@ import (
 	"mime/multipart"
 	"strconv"
 	"sync"
+
+	logging "github.com/sirupsen/logrus"
 )
 
 type ProductService struct {
@@ -17,7 +19,7 @@ type ProductService struct {
 	ProductName   string `json:"product_name" form:"product_name"`
 	Price         string `json:"price" form:"price"`
 	CategoryId    int    `json:"category_id" form:"category_id"`
-	Title         string    `json:"title" form:"title"`
+	Title         string `json:"title" form:"title"`
 	Info          string `json:"info" form:"info"`
 	DiscountPrice string `json:"discount_price" form:"discount_price"`
 	Onsale        bool   `json:"on_sale" form:"on_sale"`
@@ -25,7 +27,10 @@ type ProductService struct {
 	model.Base
 }
 
-func (service ProductService) Create(ctx context.Context, uid uint, files []*multipart.FileHeader) serializer.Response {
+type ListProductImgService struct {
+}
+
+func (service *ProductService) Create(ctx context.Context, uid uint, files []*multipart.FileHeader) serializer.Response {
 	var err error
 	var boss *model.User
 
@@ -38,6 +43,7 @@ func (service ProductService) Create(ctx context.Context, uid uint, files []*mul
 	tmp, _ := files[0].Open()
 	path, err := UploadProductToLoacalStatic(tmp, uid, service.ProductName)
 	if err != nil {
+		logging.Info(err)
 		code = e.ErrorImgUpload
 		return serializer.Response{
 			Status: code,
@@ -49,7 +55,7 @@ func (service ProductService) Create(ctx context.Context, uid uint, files []*mul
 	product := &model.Product{
 		ProductName:   service.ProductName,
 		Price:         service.Price,
-		DiscountPrice: service.ProductName,
+		DiscountPrice: service.DiscountPrice,
 		Info:          service.Info,
 		Title:         service.Title,
 		CategoryId:    service.CategoryId,
@@ -83,6 +89,7 @@ func (service ProductService) Create(ctx context.Context, uid uint, files []*mul
 
 		path, err := UploadProductToLoacalStatic(tmp, uid, service.ProductName+num)
 		if err != nil {
+			logging.Info(err)
 			code = e.ErrorImgUpload
 			return serializer.Response{
 				Status: code,
@@ -97,20 +104,132 @@ func (service ProductService) Create(ctx context.Context, uid uint, files []*mul
 
 		err = ProductImgDao.Create(productImg)
 		if err != nil {
+			logging.Info(err)
 			code = e.ErrorDatabase
 			return serializer.Response{
 				Status: code,
 				Msg:    e.GetMsg(code),
 			}
+
 		}
 
 		wg.Done()
 	}
-	
+
 	wg.Wait()
 	return serializer.Response{
 		Status: code,
 		Data:   serializer.BuildProduct(product),
 		Msg:    e.GetMsg(code),
+	}
+}
+
+func (service *ProductService) List(ctx context.Context) serializer.Response {
+	var code int
+	var products []*model.Product
+	var total int64
+
+	if service.PageSize == 0 {
+		service.PageSize = 15
+	}
+
+	condition := make(map[string]interface{})
+	if service.CategoryId != 0 {
+		condition["category_id"] = service.CategoryId
+	}
+
+	productDao := dao.NewProductDao(ctx)
+	// 获取商品数量
+	total, err := productDao.CountProductByConditon(condition)
+	if err != nil {
+		logging.Info(err)
+		code = e.ErrorDatabase
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+
+	// 异步并发
+	wg := new(sync.WaitGroup)
+	wg.Add(1)
+	go func() {
+		productDao = dao.NewProductDaoByDb(productDao.DB)
+		products, _ = productDao.ListProductByConditon(condition, service.Base)
+		wg.Done()
+	}()
+	wg.Wait()
+
+	return serializer.BuildListResponse(serializer.BuildProducts(products), uint(total))
+}
+
+func (service *ProductService) Search(ctx context.Context) serializer.Response {
+	var code int
+	var products []*model.Product
+	productDao := dao.NewProductDao(ctx)
+
+	if service.PageSize == 0 {
+		service.PageSize = 15
+	}
+
+	products, err := productDao.SearchProducts(service.Info, service.Base)
+	if err != nil {
+		logging.Info(err)
+		code = e.ErrorDatabase
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+
+	return serializer.BuildListResponse(serializer.BuildProducts(products), uint(len(products)))
+}
+
+// 获取商品信息
+func (service *ProductService) Show(ctx context.Context, id string) serializer.Response {
+	code := e.Success
+	pid, _ := strconv.Atoi(id)
+
+	productDao := dao.NewProductDao(ctx)
+
+	product, err := productDao.GetProuctById(uint(pid))
+	if err != nil {
+		logging.Info(err)
+		code = e.ErrorProductGetFail
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+
+	return serializer.Response{
+		Status: code,
+		Data:   serializer.BuildProduct(product),
+		Msg:    e.GetMsg(code),
+	}
+}
+
+// 获取商品 展示
+func (service *ListProductImgService) ListImg(ctx context.Context, id string) serializer.Response {
+	code := e.Success
+	productImgDao := dao.NewProductImgDao(ctx)
+	pid, _ := strconv.Atoi(id)
+
+	productImg, err := productImgDao.List(uint(pid))
+	if err != nil {
+		code = e.ErrorProductImgGetFail
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+
+	return serializer.Response{
+		Status: code,
+		Msg:    e.GetMsg(code),
+		Data:   serializer.BuildListResponse(serializer.BuildProductImgs(productImg), uint(len(productImg))),
 	}
 }

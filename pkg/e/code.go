@@ -14,6 +14,10 @@ const (
 	ErrorUploadFail            = 30007
 	ErrSendEmail               = 30008
 
-	ErrorImgUpload = 40001
-	ErrorDatabase  = 50001
+	ErrorProductGetFail    = 40001
+	ErrorProductImgGetFail = 40002
+	ErrorCategoryGetFail   = 40003
+
+	ErrorImgUpload = 50001
+	ErrorDatabase  = 60001
 )

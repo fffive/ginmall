@@ -44,3 +44,13 @@ func BuildProduct(product *model.Product) *ProductVo {
 		BossAvatar:    product.BossAvatar,
 	}
 }
+
+// 构建多值的返回值
+func BuildProducts(items []*model.Product) (products []ProductVo) {
+	for _, item := range items {
+		product := BuildProduct(item)
+		products = append(products, *product)
+	}
+
+	return products
+}

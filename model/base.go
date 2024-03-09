@@ -1,6 +1,6 @@
 package model
 
 type Base struct {
-	pageNum  int `form:"pageNum"`
-	pageSize int `form:"pageSize"`
+	PageNum  int `form:"page_num"`
+	PageSize int `form:"page_size"`
 }

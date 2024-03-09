@@ -24,3 +24,48 @@ func CreateProduct(c *gin.Context) {
 		logging.Info(err)
 	}
 }
+
+// 展示所有
+func ListProducts(c *gin.Context) {
+	ListProductsService := service.ProductService{}
+
+	if err := c.ShouldBind(&ListProductsService); err == nil {
+		res := ListProductsService.List(c.Request.Context())
+		c.JSON(http.StatusOK, res)
+	} else {
+		c.JSON(http.StatusBadRequest, err)
+		logging.Info(err)
+	}
+}
+
+// 查询
+func SearchProducts(c *gin.Context) {
+	searchProductsService := service.ProductService{}
+
+	if err := c.ShouldBind(&searchProductsService); err == nil {
+		res := searchProductsService.Search(c.Request.Context())
+		c.JSON(http.StatusOK, res)
+	} else {
+		c.JSON(http.StatusBadRequest, err)
+		logging.Info(err)
+	}
+}
+
+// 获取单个商品详细信息
+func ShowProduct(c *gin.Context) {
+	showProductService := service.ProductService{}
+	res := showProductService.Show(c.Request.Context(), c.Param("id"))
+	c.JSON(http.StatusOK, res)
+}
+
+// 获取商品图片 给予前端展示
+func ListProductImg(c *gin.Context) {
+	listProductImg := service.ListProductImgService{}
+	if err := c.ShouldBind(&listProductImg); err == nil {
+		res := listProductImg.ListImg(c.Request.Context(), c.Param("id"))
+		c.JSON(http.StatusOK, res)
+	}else {
+		logging.Info(err)
+		c.JSON(http.StatusBadRequest, err)
+	}
+}
