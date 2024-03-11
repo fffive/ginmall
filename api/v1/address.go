@@ -50,3 +50,29 @@ func DeleteAddress(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, err)
 	}
 }
+
+func ListAddress(c *gin.Context) {
+	service := service.AddressService{}
+
+	claims, _ := utils.ParseToken(c.GetHeader("Authorization"))
+	if err := c.ShouldBind(&service); err == nil {
+		res := service.Show(c.Request.Context(),  claims.ID)
+		c.JSON(http.StatusOK, res)
+	}else {
+		logrus.Info(err)
+		c.JSON(http.StatusBadRequest, err)
+	}
+}
+
+func UpdateAddress(c *gin.Context) {
+	service := service.AddressService{}
+
+	claims, _ := utils.ParseToken(c.GetHeader("Authorization"))
+	if err := c.ShouldBind(&service); err == nil {
+		res := service.Update(c.Request.Context(),  claims.ID, c.Param("id"))
+		c.JSON(http.StatusOK, res)
+	}else {
+		logrus.Info(err)
+		c.JSON(http.StatusBadRequest, err)
+	}
+}

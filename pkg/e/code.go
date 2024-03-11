@@ -17,6 +17,8 @@ const (
 	ErrorProductGetFail    = 40001
 	ErrorProductImgGetFail = 40002
 	ErrorCategoryGetFail   = 40003
+	ErrorProductExistCart  = 40004
+	ErrorProductMoreCart   = 40005
 
 	ErrorImgUpload = 50001
 	ErrorDatabase  = 60001

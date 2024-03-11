@@ -25,18 +25,32 @@ func (dao AddressDao) Create(address *model.Address) error {
 }
 
 // 根据uid获取地址
-func (dao AddressDao)GetAddressByUid(uid uint) (address []*model.Address, err error) {
+func (dao AddressDao) GetAddressByUid(uid uint) (address []*model.Address, err error) {
 	err = dao.DB.Where("user_id = ?", uid).Find(&address).Error
 	return
 }
 
-//查询单个
+// 查询单个
 func (dao AddressDao) List(uid uint, aid string) (address *model.Address, err error) {
-	err = dao.DB.Where("user_id = ? AND id = ?",uid, aid).First(&address).Error
+	err = dao.DB.Where("user_id = ? AND id = ?", uid, aid).First(&address).Error
 
-	return 
+	return
 }
 
 func (dao AddressDao) Delete(uid uint, aid string) error {
 	return dao.DB.Where("user_id = ? AND id = ?", uid, aid).Delete(&model.Address{}).Error
+}
+
+func (dao AddressDao) ListAddressById(uid uint) (address []*model.Address, err error) {
+	err = dao.DB.Where("user_id = ?", uid).Find(&address).Error
+	return
+}
+
+func (dao AddressDao) UpdateAddress(aid uint, address *model.Address) error {
+	return dao.DB.Model(&model.Address{}).Where("id = ?", aid).Updates(&address).Error
+}
+
+func (dao AddressDao) GetAddressByAid(aid uint) (address *model.Address, err error) {
+	err = dao.DB.Model(&model.Address{}).Where("id = ?", aid).Find(&address).Error
+	return 
 }

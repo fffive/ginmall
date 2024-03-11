@@ -56,9 +56,32 @@ func NewRouter() *gin.Engine {
 			// 地址
 			authed.POST("addresses", api.CreateAddress)
 			authed.GET("addresses/:id", api.GetAddress)
-			// authed.GET("addresses", api.ListAddress)
-			// authed.PUT("addresses/:id", api.UpdateAddress)
+			authed.GET("addresses", api.ListAddress)
+			authed.PUT("addresses/:id", api.UpdateAddress)
 			authed.DELETE("addresses/:id", api.DeleteAddress)
+
+			// 订单
+			authed.POST("orders", api.CreateOrder)
+			// authed.GET("orders", api.ListOrders)
+			// authed.GET("orders/:id", api.ShowOrder)
+			// authed.DELETE("orders/:id", api.DeleteOrder)
+
+			// 购物车
+			authed.POST("carts", api.CreateCart)
+			// authed.GET("carts", api.ShowCarts)
+			// authed.PUT("carts/:id", api.UpdateCart) // 购物车id
+			// authed.DELETE("carts/:id", api.DeleteCart)
+
+			// 支付功能
+			// authed.POST("paydown", api.OrderPay)
+
+			// 显示金额
+			// authed.POST("money", api.ShowMoney)
+
+			// 秒杀专场
+			// authed.POST("import_skill_goods", api.ImportSkillGoods)
+			// authed.POST("init_skill_goods", api.InitSkillGoods)
+			// authed.POST("skill_goods", api.SkillGoods)
 		}
 	}
 

@@ -19,6 +19,8 @@ var MsgFlags = map[int]string{
 	ErrorProductGetFail:    "商品信息获取失败",
 	ErrorProductImgGetFail: "商品照片获取失败",
 	ErrorCategoryGetFail:   "获取分类信息失败",
+	ErrorProductExistCart:  "商品存在在购物车中",
+	ErrorProductMoreCart:   "商品数量超过购物车数量",
 }
 
 func GetMsg(code int) string {

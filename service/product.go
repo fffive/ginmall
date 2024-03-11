@@ -193,7 +193,7 @@ func (service *ProductService) Show(ctx context.Context, id string) serializer.R
 
 	productDao := dao.NewProductDao(ctx)
 
-	product, err := productDao.GetProuctById(uint(pid))
+	product, err := productDao.GetProductById(uint(pid))
 	if err != nil {
 		logging.Info(err)
 		code = e.ErrorProductGetFail

@@ -6,6 +6,7 @@ import (
 	"ginmall/model"
 	"ginmall/pkg/e"
 	"ginmall/serializer"
+	"strconv"
 
 	"github.com/sirupsen/logrus"
 )
@@ -92,7 +93,62 @@ func (service *AddressService) Delete(ctx context.Context, uid uint, aid string)
 
 	return serializer.Response{
 		Status: code,
-		Data:   "成功取消收藏",
+		Data:   "成功删除地址",
+		Msg:    e.GetMsg(code),
+	}
+}
+
+func (service *AddressService) Show(ctx context.Context, uid uint) serializer.Response {
+	var code int
+	addressDao := dao.NewAddressDao(ctx)
+
+	address, err := addressDao.ListAddressById(uid)
+	if err != nil {
+		logrus.Info(err)
+		code = e.ErrorDatabase
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+
+	return serializer.Response{
+		Status: code,
+		Data:   serializer.BuildAddresses(address),
+		Msg:    e.GetMsg(code),
+	}
+}
+
+func (service *AddressService) Update(ctx context.Context, uid uint, aid string) serializer.Response {
+	var code int
+	addressDao := dao.NewAddressDao(ctx)
+	aId, _ := strconv.Atoi(aid)
+
+	address := &model.Address{
+		UserId: uid,
+		Name:   service.Name,
+		Phone:  service.Phone,
+		Address: service.Address,
+	}
+
+	err := addressDao.UpdateAddress(uint(aId), address)
+	if err != nil {
+		logrus.Info(err)
+		code = e.ErrorDatabase
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+	addressDao = dao.NewAddressDaoByDB(addressDao.DB)
+	var addresses []*model.Address
+	addresses, _ = addressDao.GetAddressByUid(uid)
+
+	return serializer.Response{
+		Status: code,
+		Data:  	serializer.BuildAddresses(addresses),
 		Msg:    e.GetMsg(code),
 	}
 }

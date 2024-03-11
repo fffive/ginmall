@@ -55,7 +55,7 @@ func (service *FavoriteService) Create(ctx context.Context, uid uint) serializer
 	}
 
 	productDao := dao.NewProductDao(ctx)
-	product, err := productDao.GetProuctById(service.ProductId)
+	product, err := productDao.GetProductById(service.ProductId)
 	if err != nil {
 		logrus.Info(err)
 		code = e.ErrorDatabase
@@ -134,6 +134,6 @@ func (service *FavoriteService) Delete(ctx context.Context, uid uint, id string)
 	return serializer.Response{
 		Status: code,
 		Msg:    e.GetMsg(code),
-		Data:   service.FavoriteId,
+		Data:   "成功取消收藏",
 	}
 }

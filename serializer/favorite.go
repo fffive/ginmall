@@ -46,7 +46,7 @@ func BuildFavorites(ctx context.Context, items []*model.Favorite) (favorites []F
 
 	for _, item := range items {
 		boss, _ := bossDao.GetUserById(item.UserId)
-		product, _ := ProductDao.GetProuctById(item.ProductId)
+		product, _ := ProductDao.GetProductById(item.ProductId)
 
 		favorite := BuildFavorite(item, product, boss)
 		favorites = append(favorites, favorite)
